@@ -837,6 +837,541 @@ Compostion Api Pattern:
 <style>
 </style>
 .....................................................................................
+				Component Composition
+
+
+Single File Component(SFC)
+.........................
+
+SFC can be written in two styles
+
+1.Using options api
+
+2.Using Composition api
+
+
+App.vue
+<script>
+import Greeter from "./components/Greeter.vue";
+export default {
+    components: { Greeter }
+}
+</script>
+<template>
+   <h1>Vue Application</h1>
+   <Greeter></Greeter>
+</template>
+
+Greeter.vue
+<script>
+</script>
+<template>
+    <h1>Greeter</h1>
+</template>
+
+Welcome.vue
+<script>
+</script>
+<template>
+    <h1>Welcome</h1>
+</template>
+
+What if i want to visualize the tree model created by vue?
+
+Dev tools: Vue dev tool
+https://devtools.vuejs.org/
+
+.................................................................................
+			   Project layout
+
+In general Projects can be categorized into  2 sections
+
+1.feature based
+products
+customers
+inventory
+payment
+etc...
+2.framework based
+src/
+ components
+    ....
+Feature + framework
+ 
+ components
+    |
+    features
+
+components
+  |
+  products
+    products-list.vue
+    products-edit.vue
+    products-search.vue
+
+eg:
+
+src/App.vue
+<script setup>
+import Header from './components/layouts/Header.vue';
+import Footer from './components/layouts/Footer.vue';
+import Body from './components/layouts/Body.vue';
+</script>
+<template>
+    <div>
+        <Header></Header>
+        <Body></Body>
+        <Footer></Footer>
+    </div>
+</template>
+
+src/components/layout
+
+Body.vue
+<script setup>
+import Greeter from '../greeter/Greeter.vue';
+</script>
+<template>
+    <div>
+        <Greeter></Greeter>
+        <p>
+            What is the best way to structure a Vue.js application so that it scales and remains maintainable and
+             </p>
+    </div>
+</template>
+
+Footer.vue
+<script setup>
+</script>
+<template>
+    <nav>
+        <h1>Footer</h1>
+    </nav>
+</template>
+
+Header.vue
+<script setup>
+</script>
+<template>
+    <nav>
+        <h1>Header</h1>
+    </nav>
+</template>
+....................................................................................
+			 Component Registration
+....................................................................................
+
+Global Components
+
+Local Components
+
+
+
+Global Components:
+  Components are created and registred as part of Application Object
+  Global components can be accessed any where the application without explicit configuration.
+
+IN SFC with options object without global registeration
+<script>
+import ComponentA from './ComponentA.vue'
+export default {
+  components:ComponentA
+}
+<script>
+<template>
+   <ComponentA></ComponentA>
+</template>
+
+
+
+IN SFC with options object with global registeration
+app.component('name',componentDefintion)
+
+<script>
+export default {
+
+}
+<script>
+<template>
+   <ComponentA></ComponentA>
+</template>
+
+IN SFC with composition api without global registration
+<script setup>
+import ComponentA from './ComponentA.vue'
+
+<script>
+<template>
+   <ComponentA></ComponentA>
+</template>
+
+
+IN SFC with composition api with global registration
+<script setup>
+
+<script>
+<template>
+   <ComponentA></ComponentA>
+</template>
+
+eg:
+ app.component('name',componentDefintion)
+
+interface App {
+  component(name: string): Component | undefined
+  component(name: string, component: Component): this
+}
+
+Global Components are registered in two mode
+
+1.Using options object without build tools
+
+import { createApp } from 'vue'
+
+const app = createApp({})
+
+app.component(
+  // the registered name
+  'MyComponent',
+  // the implementation
+  {
+    /* ... */
+  }
+)
+2.Using SFC  with build tool
+
+import MyComponent from './App.vue'
+
+app.component('MyComponent', MyComponent)
+
+.................................................................................
+			 Local Components Registration
+................................................................................
+
+Components are registered when the child component is created
+
+SFC using composition pattern using setup attribute:
+
+Greeter.vue
+<script setup>
+  import ComponentA from './ComponentA.vue'
+</script>
+
+<template>
+  <ComponentA />
+</template>
+
+SFC using composition pattern using without setup attribute:
+
+Greeter.vue
+<script setup>
+  import ComponentA from './ComponentA.vue'
+
+export default {
+   components: { 
+         ComponentsA
+   }
+}
+</script>
+
+<template>
+  <ComponentA />
+</template>
+...................................................................................
+			Global Vs Local Component Registration
+.................................................................................
+
+=>Global registration prevents build systems from removing unused components (a.k.a "tree-shaking").
+=>If you globally register a component but end up not using it anywhere in your app, it will still be included in the final bundle.
+
+=>Global registration makes dependency relationships less explicit in large applications. 
+
+=>It makes it difficult to locate a child component's implementation from a parent component using it.
+
+=>This can affect long-term maintainability similar to using too many global variables.
+....................................................................................
+			 Component Naming Conventions
+.....................................................................................
+
+PascalCase names are valid JavaScript identifiers. This makes it easier to import and register components in JavaScript. It also helps IDEs with auto-completion.
+
+<PascalCase /> makes it more obvious that this is a Vue component instead of a native HTML element in templates. It also differentiates Vue components from custom elements (web components).
+
+This is the recommended style when working with SFC or string templates. However, as discussed in DOM Template Parsing Caveats, PascalCase tags are not usable in DOM templates.
+
+The Component names can be kebab-case /dash case eg
+   <app-root>
+   <hello-world>
+   <greeter>
+Vue supports both cases , but highly recommened is Pascal Case
+
+<script>
+//Here we dont need to import and refer in export default.
+//Global components can used directly.
+//import CompanyVue from '../Company.vue';
+export default {
+  //  components:Company
+}
+</script>
+<template>
+    <nav>
+        <company></company>
+    </nav>
+</template>
+.....................................................................................				Exploring Templates
+....................................................................................
+
+Templates can be static or dymamic
+
+static templates are having pure html code
+dynamic tempaltes are having html + dynamic state
+
+Data Binding:
+.............
+Types of Binding
+
+1.interpolation
+2.property /props
+3.attribute binding
+4.event binding
+5.class and style binding
+
+1.interploation:
+
+ Transfering data from the component(script) to View(template)
+
+SFC:
+
+Using options object Api style
+
+Using Composition Api style
+
+
+
+Using options object Api style:
+..............................
+<script>
+// options object
+export default {
+    //state declaration 
+    data() {
+        //return object which is called as state object
+        return {
+            message: 'Hello'
+        }
+    }
+}
+</script>
+<template>
+    <div>
+        <h1>Data Binding-Using Options Object</h1>
+         <h2>{{message}}</h2>
+    </div>
+</template>
+
+Using Composition Api:
+
+<script> without setup attribute
+
+<script setup> With setup attribute
+
+
+<script> without setup attribute:
+.................................
+
+The component logic must be encapsulated inside a function called "setup"
+
+export default {
+
+ setup(){
+
+ }
+
+}
+
+eg:
+<script>
+//composition api with setup function
+export default {
+    setup() {
+        console.log('setup is called')
+        const message = 'Hello!!'
+        //variables or any thing if you want to access inside template, must be returned via an object
+        return {
+            //message:message
+            message
+        }
+    }
+}
+</script>
+<template>
+    <h1>Data Binding :Using Composition App with Setup Function</h1>
+    <h1>{{ message }}</h1>
+</template>
+
+<script setup> With setup attribute:
+.......................................
+<script setup>
+//variable declarations
+const message = "Hello"
+//function declarations
+function sayHai() {
+    return 'Hai'
+}
+</script>
+<template>
+    <h1>Data Binding :Using Composition App with Setup attribute</h1>
+    <h1>{{ message }} {{ sayHai() }}</h1>
+</template>
+
+Note:
+
+=><script setup> is compile time syntactic sugar for composition API inside SFCs
+=>It is highly recommended syntax if you are using both SFCs and compostion API
+=>It offers lot benefits over normal syntax
+
+ 1.More readable code with less boilerplate
+ 2.Better Runtime Performance
+ 3.Render performance
+ 4.Better IDE support
+
+code segments inside script setup
+
+1.variable declarations
+2.function declarations
+3.import other components and utiltity functions
+....................................................................................
+
+Interpolation:
+ What type of data we can interploate
+
+=>primitives - number,string,boolean
+=>Objects => literal objects,arrays
+<script setup>
+//variables
+const firstName = 'Subramanian'
+const salary = 1000
+const status = true
+const address = {
+    city: 'Coimbatore',
+    state: 'Tamil Nadu'
+}
+const skills = ['Javascript', 'Vue', 'React', 'Java']
+const x = 10;
+const y = 20;
+function multiply() {
+    return x * y
+}
+const foo = undefined;
+</script>
+<template>
+    <div>
+        <h1>Data Binding</h1>
+        <h2>String</h2>
+        <h3>Name : {{ firstName }}</h3>
+        <h2>Number</h2>
+        <h3>Salary: {{ salary }}</h3>
+        <h2>Boolean</h2>
+        <h3>Name : {{ status ? 'Available' : 'NotAvaiable' }}</h3>
+        <h2>Object</h2>
+        <h3>Address : {{ address.city }} {{ address.state }}</h3>
+        <h2>Array</h2>
+        <h3>Skills : {{ skills }}</h3>
+        <h2>Java script Expression</h2>
+        <h3>Computation: {{ x + y }} {{ multiply() }}</h3>
+        <h2>undefined</h2>
+        <h3>Result : {{ foo ? "Found" : "Not Found" }}</h3>
+
+
+    </div>
+</template>
+....................................................................................
+			Directives Getting Started
+
+
+Vue is highly modular , code resue is main objective
+
+ways to reuse codes
+
+1.components
+2.composables -(hooks)
+3.directives
+Components are the main building blocks, while composables are focused on reusing stateful logic. Custom directives, on the other hand, are mainly intended for reusing logic that involves low-level DOM access on plain elements.
+
+Directives are used to enchance existing HTML elements with extra behaviour
+
+eg:
+  <div id="" class="" style="" ></div>
+       |       |       |
+      attributes -  Built in attributes
+
+  <div custom-attribute> </div>
+
+Vue helps to add custom attributes on existing elements via "directives" -Attribute Directives
+
+Attribute directives syntax
+.............................
+
+v-directiveName
+
+Built in Directives:
+...................
+v-text
+v-html
+v-show
+v-if
+v-else
+v-else-if
+v-for
+v-on
+v-bind
+v-model
+v-slot
+v-pre
+v-once
+v-memo
+v-cloak
+
+..................................................................................
+			   v-html
+...................................................................................
+
+v-html :
+ inserts data into html element as "HTML"
+{{}} 
+  inserts data into html element as "Plain Text"
+
+ <script setup>
+//variables
+const firstName = 'Subramanian'
+</script>
+<template>
+    <div>
+        <h1>Directives</h1>
+        <h2>{{firstName}}</h2>
+        <h2 v-html="firstName"></h2>
+    </div>
+</template>
+..................................................................................
+			  v-bind
+.................................................................................
+
+v-bind attribute directive helps to bind attribute values dynamically.
+
+static binding
+ <img src="logo.png"/>
+
+dynamic binding
+ if img location is given inside script as variable, now i want to bind that image to img element
+<script>
+  const imageUrl="logo.png"
+</script>
+
+<img v-bind:src="imageUrl"/>
+  
+
+
+
 
 
 

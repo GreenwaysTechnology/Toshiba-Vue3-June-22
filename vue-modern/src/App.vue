@@ -1,10 +1,11 @@
-<!-- Compostion api Pattern  -->
 <script setup>
- //java script code can go directly
- 
+//variables
+const firstName = 'Subramanian'
 </script>
 <template>
-  <h1>Single File Component using Composition Api Pattern</h1>
+    <div>
+        <h1>Directives</h1>
+        <h2>{{firstName}}</h2>
+        <h2 v-html="firstName"></h2>
+    </div>
 </template>
-<style>
-</style>
