@@ -1124,7 +1124,7 @@ export default {
 Templates can be static or dymamic
 
 static templates are having pure html code
-dynamic tempaltes are having html + dynamic state
+dynamic templates are having html + dynamic state
 
 Data Binding:
 .............
@@ -1296,6 +1296,8 @@ ways to reuse codes
 1.components
 2.composables -(hooks)
 3.directives
+
+
 Components are the main building blocks, while composables are focused on reusing stateful logic. Custom directives, on the other hand, are mainly intended for reusing logic that involves low-level DOM access on plain elements.
 
 Directives are used to enchance existing HTML elements with extra behaviour
@@ -1308,6 +1310,8 @@ eg:
   <div custom-attribute> </div>
 
 Vue helps to add custom attributes on existing elements via "directives" -Attribute Directives
+
+Directive is object, which encapsulate the logic of that attribute
 
 Attribute directives syntax
 .............................
@@ -1333,7 +1337,7 @@ v-memo
 v-cloak
 
 ..................................................................................
-			   v-html
+			    v-html and v-text
 ...................................................................................
 
 v-html :
@@ -1341,24 +1345,34 @@ v-html :
 {{}} 
   inserts data into html element as "Plain Text"
 
- <script setup>
-//variables
-const firstName = 'Subramanian'
+				v-text
+
+Update the element's text content. - innerText
+
+<span v-text="msg"></span>
+<!-- same as -->
+<span>{{msg}}</span>
+
+<script setup>
+const firstName = "Subramanian"
 </script>
 <template>
     <div>
-        <h1>Directives</h1>
-        <h2>{{firstName}}</h2>
-        <h2 v-html="firstName"></h2>
+        <h1>Inter polation using mustache Notation</h1>
+        <h2>First Name {{ firstName }}</h2>
+        <h1>Inter polation using directive - innerHTML</h1>
+        <h2 v-html="` First Name ${firstName}`"></h2>
+        <h1>Inter polation using directive - innerText</h1>
+        <h2 v-text="` First Name ${firstName}`"></h2>
     </div>
 </template>
 ..................................................................................
-			  v-bind
+			       v-bind
 .................................................................................
 
-v-bind attribute directive helps to bind attribute values dynamically.
+v-bind binds html element attributes or component values(properties) dyamically.
 
-static binding
+Static binding
  <img src="logo.png"/>
 
 dynamic binding
@@ -1369,6 +1383,536 @@ dynamic binding
 
 <img v-bind:src="imageUrl"/>
   
+<script setup>
+const imageUrl = "/src/assets/logo.svg"
+</script>
+<template>
+    <div>
+        <h1>Bind Directives</h1>
+        <div>
+            <h2>Static Image</h2>
+            <img src="./assets/logo.svg" height="100" width="100" />
+        </div>
+        <div>
+            <h2>Dynamic Image using v-bind Directive</h2>
+            <img v-bind:src="imageUrl" height="100" width="100" />
+        </div>
+        <div>
+            <h2>Dynamic Image using v-bind Directive -shortcut</h2>
+            <img :src="imageUrl" height="100" width="100" />
+        </div>
+    </div>
+</template>
+....................................................................................
+			     Data  Representation in Vue
+....................................................................................
+
+Data can be reprsented inside component in two ways
+
+1.state pattern
+   The data is encasulated inside component itself
+2.props pattern
+   The data is supplied from outside(parent component)
+
+
+State Pattern:
+
+ Data is two type
+
+data can be both primitive or objects(arrays)
+ 
+1.Non Reactive 
+
+2.Reactive 
+
+Non Reactive data when you change /update, never tigger render cycles of view
+
+eg:
+<script>
+export default {
+    setup() {
+        //state- non reactive
+        const counter = 0
+        return {
+            counter
+        }
+    }
+}
+</script>
+<template>
+    <div>
+        <h1>State Application -Non Reactive</h1>
+        <h1>Counter : {{ counter }}</h1>
+    </div>
+</template>
+
+if you want to change data, we need to interact with UI, we need event handling
+....................................................................................
+				Event Handling
+...................................................................................
+
+There are two things in order to write event handling
+
+1.Attach event on dom element
+2.Listen on particular event using listeners or handlers
+
+How to attach events and bind listeners , How to write listeners?
+
+Listners are simple javascript function
+
+<script>
+export default {
+    setup() {
+        //state- non reactive
+        const counter = 0
+
+        //listener
+        function onIncrement() {
+            console.log('onIncrement is called')
+        }
+
+        return {
+            counter, onIncrement
+        }
+    }
+}
+</script>
+<template>
+    <div>
+        <h1>State Application -Non Reactive</h1>
+        <h1>Counter : {{ counter }}</h1>
+    </div>
+</template>
+
+....
+
+How to bind events?
+
+ There is a directive called "v-on:nameOftheEvent" directive
+ v-on:click="handler"
+ We have even short cut
+ @click="handler"
+
+<script>
+export default {
+    setup() {
+        //state- non reactive
+        const counter = 0
+
+        //listener
+        function onIncrement() {
+            console.log('onIncrement is called')
+        }
+
+        return {
+            counter, onIncrement
+        }
+    }
+}
+</script>
+<template>
+    <div>
+        <h1>State Application -Non Reactive</h1>
+        <h1>Counter : {{ counter }}</h1>
+        <!-- <button v-on:click="onIncrement">increment</button> -->
+        <button @click="onIncrement">increment</button>
+
+    </div>
+</template>
+.....................................................................................
+                           State Mutation -  change/update
+....................................................................................
+
+<script>
+export default {
+    setup() {
+        //state- non reactive
+        let counter = 0
+
+        //listener
+        function onIncrement() {
+            console.log('onIncrement is called')
+            //update the state
+            counter++
+            console.log(`Counter ${counter}`)
+
+        }
+
+        return {
+            counter, onIncrement
+        }
+    }
+}
+</script>
+<template>
+    <div>
+        <h1>State Application -Non Reactive</h1>
+        <h1>Counter : {{ counter }}</h1>
+        <!-- <button v-on:click="onIncrement">increment</button> -->
+        <button @click="onIncrement">increment</button>
+
+    </div>
+</template>
+
+Here we are trying to update the counter state variable, there is update happening but it does not trigger "view update"
+   Because the state is non reactive...
+...................................................................................
+				Reactivity
+...................................................................................
+
+
+What is Reactivity?
+
+Reactivity is one of the core vue js concept.
+Component state are reactive javascript objects.
+
+When we modify them, the view updates.
+
+Reactivity is a programming style that allows us to adjust to changes in declartive manner.
+
+eg:
+Excel spreed sheet is one of the best eg for reactivitity programming
+
+eg;
+
+let A1=1
+let A2=2
+let A3 =A1+A2
+console.log(A3) => 3
+
+A2=4
+
+console.log(A3) 
+
+Here when you mutate A1 or A2, does not change automatically.
+
+How to implement to trigger this changes in js?
+
+We can wrap this code inside function
+
+ let A3
+ function update(){
+   A3 = A1 + A2
+ }
+
+in order get fresh value, we have to re-run the code that updates A3
+
+Pointers:
+
+1.There should be some update function, which produces a "side effect /effect".
+  if any function which changes the state of the program called side effect.
+
+2.Here ,A1 and A2 are considered dependencies of the side effect, because which helps makes side effects.
+  According to dependencies, this effect is said to be "subscriber"
+
+When ever "A1 and A2" changed, we need to invoke "update" function,which cause side effects.
+
+It looks like event driven programming (Pub-Sub Pattern /Observerable and Observer) 
+
+ function whenDepChange(update){
+     update()
+ }
+
+ let A3
+ function update(){
+   A3 = A1 + A2
+ }
+
+ whenDepChange(function(){
+     A3 = A1 + A2
+ })
+ whenDepChange(update)
+
+Role of whenDepchange function:
+................................
+
+1.Tracking the dependencies,
+    By evaulating the expression A1 and A2 ,Whether any one of them is read or not.
+
+Tracker--->triggers--whenDepChange--->runs update function---returns modified state
+
+....................................................................................
+			   How vue implements Reactivity
+.....................................................................................
+
+There are two patterns have implmented in order to implement reactivity
+
+1.Getters and Setters of Object to be changed 
+   Vue 2 has implmented this pattern
+  Still this pattern is available in V3 as well
+
+2.Javascript Proxy pattern
+   Vue 3 has implemented Proxy for Reactivity.
+
+
+When we use SFC using Compostion Api pattern
+  reactivity implementations are given as apis
+
+When we use SFC using Options Api Pattern
+  reactivity implementations are given inside "data" method 
+ Options api uses only "Getters and Setters" Pattern
+  
+
+Compostion Api pattern:
+
+ref()
+computed()
+reactive()
+readonly()
+watchEffect()
+watchPostEffect()
+watchSyncEffect()
+watch()
+
+How to represent reactive State?
+
+ref api
+ Used for primitives -strings,numbers,booleans
+ objects can be used but avoid.
+reactive api
+ Used for objects and arrays.
+
+
+eg:
+<script>
+//imort reactive apis
+import { ref } from 'vue'
+
+export default {
+    setup() {
+        //reactive state
+        let counter = ref(0)
+        console.log(counter.value)
+
+        //listener
+        function onIncrement() {
+            console.log('onIncrement is called')
+            //update the state
+            counter.value++
+            console.log(`Counter ${counter.value}`)
+        }
+
+        return {
+            counter, onIncrement
+        }
+    }
+}
+</script>
+<template>
+    <div>
+        <h1>State Application -Non Reactive</h1>
+        <h1>Counter : {{ counter }}</h1>
+        <!-- <button v-on:click="onIncrement">increment</button> -->
+        <button @click="onIncrement">increment</button>
+
+    </div>
+</template>
+
+Reactivity with script setup attribute
+<script setup>
+//imort reactive apis
+import { ref } from 'vue'
+
+//reactive state
+let counter = ref(0)
+//listener
+const onIncrement = () => counter.value++
+</script>
+<template>
+    <div>
+        <h1>State Application -Non Reactive</h1>
+        <h1>Counter : {{ counter }}</h1>
+        <!-- <button v-on:click="onIncrement">increment</button> -->
+        <button @click="onIncrement">increment</button>
+    </div>
+</template>
+
+..................................................................................
+			State Mutation using Options Api
+...................................................................................
+
+<script>
+export default {
+    data() {
+        //reactive state
+        return {
+            counter: 0
+        }
+    },
+    //listeners
+    methods: {
+        onIncrement() {
+            this.counter++
+        }
+    }
+
+}
+</script>
+<template>
+    <div>
+        <h1>State Application -Non Reactive</h1>
+        <h1>Counter : {{ counter }}</h1>
+        <!-- <button v-on:click="onIncrement">increment</button> -->
+        <button @click="onIncrement">increment</button>
+    </div>
+</template>
+....................................................................................
+			Mulitiple Listeners and State mutation
+....................................................................................
+<script setup>
+import { ref } from 'vue';
+const counter = ref(0)
+
+//two listeners
+const onIncrement = () => counter.value++
+const onDecrement = () => counter.value--
+
+</script>
+<template>
+    <div>
+        <h1>Counter Application</h1>
+        <h1>Counter {{ counter }}</h1>
+        <button @click="onIncrement">+</button>
+        <button @click="onDecrement">-</button>
+    </div>
+</template>
+<style>
+</style>
+....................................................................................
+			 Multiple Reactive State Variables
+<script setup>
+import { ref } from 'vue';
+
+//reactive states
+const like = ref(0)
+const dislike = ref(0)
+
+//two listeners
+const onLike = () => like.value++
+const onDislike = () => dislike.value++
+
+</script>
+<template>
+    <div>
+        <h1>Like and DisLike Application</h1>
+        <h1>Likes {{ like }} DisLike {{ dislike }}</h1>
+        <button @click="onLike">Like</button>
+        <button @click="onDislike">Dislike</button>
+    </div>
+</template>
+<style>
+</style>
+...................................................................................
+			 How to declare objects
+
+<script setup>
+import { reactive } from 'vue';
+
+//reactive object
+const counter = reactive({
+    count: 0
+})
+console.log(counter.count)
+const onIncrement = () => counter.count++
+
+</script>
+<template>
+    <div>
+        <h1>Counter Application</h1>
+        <h1>Counter {{ counter.count }}</h1>
+        <button @click="onIncrement">+</button>
+    </div>
+</template>
+<style>
+</style>
+.................................................................................
+			 Reactivity for Object and its nested Object
+
+In vue, state is deeply reactive by default, This means you can change inner objects 
+which is reactive.
+
+<script setup>
+import { reactive } from 'vue';
+
+//reactive  deep nested objects
+const app = reactive({
+    counter: {
+        inc: {
+            count: 0
+        }
+    }
+})
+const onIncrement = () => app.counter.inc.count++
+
+</script>
+<template>
+    <div>
+        <h1>Counter Application</h1>
+        <h1>Counter {{ app.counter.inc.count }}</h1>
+        <button @click="onIncrement">+</button>
+    </div>
+</template>
+<style>
+</style>
+.....................................................................................
+			Arrays Rendering- List Rendering
+....................................................................................
+
+Arrays:
+=>Arrays are basic datastructure which is used to render collection of data.
+=>Arrays are dynamic 
+
+Arrays and UI
+ if you want to render more data , then array is used..
+Arrays can help to build in UI layouts in various ways
+
+Layouts:
+
+1.List View
+  <ul><li></li></ul>
+
+2.Card View layout
+   <div> <header>....
+
+3.Grid View layout
+   <table>
+
+How to iterate array inside template?
+ 
+ We have special directive called "v-for"
+ <script setup>
+import { reactive } from 'vue';
+import TODOS from './mock-data/todos';
+
+const todos = reactive(TODOS)
+
+</script>
+<template>
+    <div>
+        <h1>Todo List</h1>
+        <ul>
+            <li v-for="todo in todos">
+                <span>{{ todo.id }} {{ todo.title }}</span>
+            </li>
+        </ul>
+    </div>
+</template>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

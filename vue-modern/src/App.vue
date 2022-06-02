@@ -1,11 +1,17 @@
 <script setup>
-//variables
-const firstName = 'Subramanian'
+import { reactive } from 'vue';
+import TODOS from './mock-data/todos';
+
+const todos = reactive(TODOS)
+
 </script>
 <template>
     <div>
-        <h1>Directives</h1>
-        <h2>{{firstName}}</h2>
-        <h2 v-html="firstName"></h2>
+        <h1>Todo List</h1>
+        <ul>
+            <li v-for="todo in todos">
+                <span>{{ todo.id }} {{ todo.title }}</span>
+            </li>
+        </ul>
     </div>
 </template>
