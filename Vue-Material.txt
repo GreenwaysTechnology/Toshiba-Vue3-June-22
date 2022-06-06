@@ -2536,22 +2536,671 @@ v-if takes boolean expression or truthy or falsy value, if it is true that block
 v-if and v-else should be in the same place.
 
 
+v-if on template
+...............
+
+Because v-if is a directive, it has to be attached to a single element. But what if we want to toggle more than one element? In this case we can use v-if on a <template> element, which serves as an invisible wrapper. The final rendered result will not include the <template> element.
+
+<template v-if="ok">
+  <h1>Title</h1>
+  <p>Paragraph 1</p>
+  <p>Paragraph 2</p>
+</template>
+v-else and v-else-if can also be used on <template>.
+
+const ok = ref('something')
+<template v-if="ok">
+        <h1>Title</h1>
+        <p>Paragraph 1</p>
+        <p>Paragraph 2</p>
+    </template>
+    <template v-else>
+        <h1>else Title</h1>
+        <p>else Paragraph 1</p>
+        <p>else Paragraph 2</p>
+    </template>
+....................................................................................
+			 v-show
+
+Another option for conditionally displaying an element is v-show directive, which is eq to v-if.
+
+<h1 v-show="conditon">This is demo</h1>
+
+
+v-if vs v-show:
+
+v-if is "real" conditional rendering because it ensures that event listeners and child components inside the conditional block are properly destroyed and re-created during toggles.
+
+v-if is also lazy: if the condition is false on initial render, it will not do anything - the conditional block won't be rendered until the condition becomes true for the first time.
+
+In comparison, v-show is much simpler - the element is always rendered regardless of initial condition, with CSS-based toggling.
+
+Generally speaking, v-if has higher toggle costs while v-show has higher initial render costs. So prefer v-show if you need to toggle something very often, and prefer v-if if the condition is unlikely to change at runtime.
+<script setup>
+import { computed, ref } from 'vue'
+const name = ref('admin')
+
+const isAdmin = computed(() => name.value === 'admin')
+
+</script>
+<template>
+    <div>
+        <!-- <h1 v-if="name === 'admin'">You are Admin</h1>
+        <h1 v-else>You are guest</h1> -->
+        <h1 v-if="isAdmin">You are Admin</h1>
+        <h1 v-else>You are guest</h1>
+    </div>
+    <template v-if="isAdmin">
+        <h1>You are admin</h1>
+        <p>This is admin </p>
+        <p>This is admin </p>
+        <p>This is admin </p>
+    </template>
+    <template v-else>
+        <h1>You are Guest</h1>
+        <p>This is Guest </p>
+        <p>This is Guest </p>
+        <p>This is Guest </p>
+        <p>This is Guest </p>
+
+    </template>
+    <h1 v-show="isAdmin">Admin Show</h1>
+</template>
+.....................................................................................
+			Components and state (data patterns)
+......................................................................................
+
+Components stores data in the form of 
+
+1.reactive state - ref,reactive
+2.computed state
+3.watchers
+4.props pattern
+.....................................................................................
+				Props Pattern
+
+Props means property.
+The component receives data from the parent compoent , which is called property.
+Props pattern inspired from react, which is based on design pattern called "Single directional data flow model" /Uni directional data flow model.
+
+			<Parent>
+			   |
+			supply data 
+			   |
+ 		        <Child>
 
 
 
+How to pass props and how to received?
+
+parent.vue
+<script setup>
+import Child from './Child.vue';
+</script>
+<template>
+<h1>Parent Component</h1>
+<hr/>
+<Child message="Hello"></Child>
+</template>
+
+child.vue
+<!-- <script>
+export default {
+    props: ['message'],
+    setup(props) {
+        //access props inside setup 
+        console.log(props.message)
+
+        return {
+            props
+        }
+    }
+
+} -->
+<!-- </script>
+<template>
+    <h2>Child</h2>
+    <h3>{{ props.message }} From the Parent Component </h3>
+</template>  -->
+<script setup>
+const props = defineProps(['message'])
+</script>
+<template>
+    <h2>Child</h2>
+    <h3>{{ props.message }} From the Parent Component </h3>
+</template>
+.....................................................................................
+				Props types
+
+
+1.static props
+   props which are hardcoded , mostly strings can be static prop
+<Child message="Hello"></Child>
+
+2.dynamic props
+  props can be updated via reactivity .
+<Child v-bind:message="Hello"></Child>
+<Child :message="variable/expressions"></Child>
+
+Parent.vue
+<script setup>
+import { ref } from 'vue';
+import DyamicProp from './DynamicProp.vue';
+
+const name = ref('Subramanian')
+const age = ref(18)
+const status = ref(true)
+</script>
+<template>
+    <h1>Parent Component</h1>
+    <hr />
+    <DyamicProp :name="name" :age="age" :status="status"></DyamicProp>
+
+</template>
+
+
+DynamicProps.vue
+
+<script setup>
+const props = defineProps(['name', 'age', 'status'])
+</script>
+<template>
+    <h2>Dynamic Prop Component</h2>
+    <div>
+        <p>Name {{ props.name }}</p>
+        <p>Age {{ props.age }}</p>
+        <p>Status {{ props.status }}</p>
+    </div>
+</template>
+...................................................................................
+				Default Props
+
+what if i dont supply any props, then it will be undefined
+
+With props  supplied
+ <DyamicProp :name="name" :age="age" :status="status"></DyamicProp>
+
+without any props supplied
+<DyamicProp></DyamicProp>
+   here all properties will be undefined.
+
+How to set default props.
+with object literal syntax.
+
+DynamicProp.vue
+<script setup>
+// const props = defineProps(['name', 'age', 'status'])
+//literal syntax with default value
+const props = defineProps({
+    name: {
+        default: 'default Name'
+    },
+    age: {
+        default: 18
+    },
+    status: {
+        default: false
+    }
+})
+</script>
+<template>
+    <h2>Dynamic Prop Component</h2>
+    <div>
+        <p>Name {{ props.name }}</p>
+        <p>Age {{ props.age }}</p>
+        <p>Status {{ props.status }}</p>
+    </div>
+</template>
+
+
+Parent.vue
+<script setup>
+import { ref } from 'vue';
+import DyamicProp from './DynamicProp.vue';
+
+const name = ref('Subramanian')
+const age = ref(18)
+const status = ref(true)
+</script>
+<template>
+    <h1>Parent Component</h1>
+    <hr />
+        <!-- With props -->
+    <DyamicProp :name="name" :age="age" :status="status"></DyamicProp>
+    <!-- Without props -->
+    <DyamicProp></DyamicProp>
+</template>
+....................................................................................
+			 Property Validation
+....................................................................................
+
+Some times i want to enforce the property data type validation, which is only for runtime vertification.
+
+eg:
+ i have property called age
+ i need to define rule for age that age must be number,it should not be string.
+
+eg:
+  defineProps({
+     age:Number,  
+     id: [Number,String] // can be string or can be number
+     name: {
+      type:String
+      required:true,
+      default:'name'
+     },
+    status: {
+	validator(value){
+	  return ['OK','NotOk','Success','Failure'].includes(value)
+       }
+    }
+ })
+
+Runtime Types:
+1.String
+2.Number
+3.Boolean
+4.Array
+5.Object
+6.Date
+7.Function
+8.Symbol
+
+eg:
+<script setup>
+import { ref } from 'vue';
+import PropValidation from './PropValidation.vue';
+
+const name = ref('Subramanian')
+const age = ref(18)
+const status = ref(true)
+</script>
+<template>
+    <h1>Parent Component</h1>
+   <PropValidation></PropValidation>
+</template>
+<script setup>
+const props = defineProps({
+    name: {
+        type: String,
+        default: 'name',
+        required: true
+    },
+    age: {
+        type: Number,
+        default: 1
+    }
+})
+</script>
+<template>
+    <h1>Property validation</h1>
+    <div>
+        <p>Name {{ props.name }} Age : {{ props.age }}</p>
+    </div>
+</template>
+
+if any validation violation, the vue will give warning only, it will not stop rendering 
+
+Vue warn]: Missing required prop: "name" 
+  at <PropValidation> 
+  at <Parent> 
+  at <App>
+...................................................................................
+				Boolean Casting
+
+props with boolean type has some special casting rules to mimic the behaviour of native boolean attributes.
+
+eg: In the dom, these attributes by default has false values
+ <div disabled> ==  <div disabled=false>
+ <div hidden> 
+
+In the similar pattern we can supply boolean values to the component,default value is true.
+
+<PropValidation status></PropValidation> => true
+
+
+<PropValidation></PropValidation> => false
+
+Note: for booleans we dont need to supply default value,if you want  you can 
+...................................................................................
+			  One way data Flow
+
+All props form a  oneway data flow model, child component cant update the props 
+
+                         "Props are read only"
 
 
 
+Parent.vue
+<script setup>
+import ChildPropMutation from './ChildPropMutation.vue';
+</script>
+<template>
+    <h1>Parent Component</h1>
+ <ChildPropMutation name="Subramanian"></ChildPropMutation>
+</template>
+
+ChildPropMutation.vue
+
+<script setup>
+const props = defineProps({
+    name: String
+})
+//update the prop
+props.name = "Foo"
+</script>
+<template>
+    <h1>Prop Mutation {{props.name}}</h1>
+</template>
+
+You will get warning:
+Set operation on key "name" failed: target is readonly. Proxy {name: 'Subramanian'}
+
+=>Props cant be modified by child components, which never triggers render cycle
+
+Use cases For Prop modification:
+
+1.The prop is used to pass in an inital value; the child component wants to use it as a local data property afterwards.
+
+<script setup>
+import CounterProp from './CounterProp.vue';
+</script>
+<template>
+    <h1>Parent</h1>
+    <CounterProp :initalCounter="10"></CounterProp>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+const props = defineProps(['initalCounter'])
+//prop as state
+const counter = ref(props.initalCounter)
+</script>
+<template>
+
+    <h1>Counter State {{ counter }}</h1>
+    <h1>Counter Props {{ props.initalCounter }}</h1>
+    <button @click="counter++">+</button>
+</template>
+....................................................................................
+			 dynamic props
+
+The state of parent component can be passed as prop to child compoent.
+
+Parent.vue
+<script setup>
+import { ref } from 'vue'
+import StateAsProp from './StateAsProp.vue';
+
+const counter = ref(10)
+
+</script >
+<template>
+    <h1>Parent</h1>
+    <StateAsProp :counter="counter"></StateAsProp>
+    <button @click="counter++">+</button>
+</template>
+
+
+StateAsProp.vue
+<script setup>
+const props = defineProps(['counter'])
+</script>
+<template>
+    <h1>State As Prop {{ props.counter }}</h1>
+</template>
+.....................................................................................
+				Component Communications
+
+Components can communicate each other in order to share "data".
+
+There are three patterns
+
+1.parent to child
+    via props pattern we can share data from the parent to child
+2.child to parent
+   Custom Events- Event emitter pattern
+3.across components
+    Via State management libs - Vuex/Pionon
+
+.....................................................................................
+				 Event Emitter Pattern
+.....................................................................................
+
+Child component can emit event with data, where as parent component can listen for data.
+
+Parent.vue
+<script setup>
+import { ref } from 'vue';
+import ChildEventEmitter from './ChildEventEmitter.vue';
+
+const message = ref('')
+const counter = ref(0)
+
+//listener 
+function update(data) {
+    console.log(data)
+    message.value = data
+}
+function onCounterUpdate(count) {
+    counter.value = count;
+}
+</script>
+<template>
+    <h1>Custom Events- Parent Component {{ message }} {{ counter }}</h1>
+    <hr />
+    <ChildEventEmitter @on-request="update" @on-counter="onCounterUpdate"></ChildEventEmitter>
+</template>
+
+ChildEventEmitter.vue
+
+<script setup>
+import { ref } from 'vue'
+//define events 
+const emit = defineEmits(['onRequest', 'onCounter'])
+
+const data = ref('Hello,I am From Child Listener')
+const counter = ref(0)
+const sendToParent = () => {
+    //emit event
+    emit('onRequest', data.value)
+}
+const onIncrement = () => {
+    //emit event
+    emit('onCounter', counter.value++)
+}
+
+</script>
+<template>
+    <h1>Custom Events- Child Component</h1>
+    <div>
+        <button @click="$emit('onRequest', 'Hello,I am from Child')">Send Data To Parent</button>
+    </div>
+    <div>
+        <button @click="sendToParent">Send Data To Parent</button>
+    </div>
+    <div>
+        <button @click="onIncrement">Send Counter To Parent</button>
+    </div>
+    <hr />
+</template>
+.....................................................................................
+	   Sending HTML attributes from Parent Component to Child
+	        Components : Fallthrough Attributes
+.....................................................................................
+
+Attribute inheritance:
+.....................
+
+A fallthrough attribute is an attribute or v-on listeners that is passed to component but it is not explicitly declared in the receiving component(child components) via props or emits
+
+Parent
+
+ <child :message="message"></child>
+
+Child
+<script setup>
+  const props =defineProps['message']
+</script>
+
+Common attributes are sent from parent to child:
+.................................................
+
+1.class
+2.style
+3.id
+
+....
+eg:
+
+MyButton.vue
+ Child Component template
+<button>click</button>
+
+Parent.vue
+<MyButton :message="test" ></MyButton>
+
+
+Parent.vue
+
+<script setup>
+import ChildAttribute from './ChildAttribute.vue';
+</script>
+<template>
+    <h1>Parent Component</h1>
+    <ChildAttribute class="fancy-btn " label="ClickMe"></ChildAttribute>
+</template>
+<style>
+.fancy-btn {
+    color: #fff;    
+}
+</style>
+.................................................................................
+if child component root component already has style or class attributes, which to be merged with child components.
+.....................................................................................
+
+How to attach listener and Event
+
+Parent Component event listener can be bound to child dom elements, From the child component parent's component listener can be invoked directly.
+
+Parent.vue
+<script setup>
+import ChildAttribute from './ChildAttribute.vue';
+
+//parent listener
+const onUpdate = () => {
+    alert('Parent listner')
+}
+
+</script>
+<template>
+    <h1>Parent Component</h1>
+    <ChildAttribute  @click="onUpdate"    class="fancy-btn " label="ClickMe"></ChildAttribute>
+</template>
+<style>
+.fancy-btn {
+    color: #fff;
+}
+</style>
 
 
 
+ChildAttribute.vue
+<script setup>
+const props = defineProps(['label'])
+</script>
+<template>
+    <button class="large">{{ props.label }}</button>
+</template>
+<style>
+.large {
+    color: rgb(228, 7, 7);
+    background: linear-gradient(315deg, #42d392 25%, #647eff);
+    border: none;
+    padding: 5px 10px;
+    margin: 5px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+</style>
+.....................................................................................
+			 How to prevent Attribute inheritance
+
+// script without setup attribute
+<script>
+  export default {
+    inheritAttrs:false
+  }
+</script>
+<script setup>
+
+</script>
+
+ChildAttribute.vue
+<script>
+export default {
+    inheritAttrs: false
+}
+</script>
+<script setup>
+const props = defineProps(['label'])
+</script>
+<template>
+    <button>{{ props.label }}</button>
+</template>
+<style>
+.large {
+    color: rgb(228, 7, 7);
+    background: linear-gradient(315deg, #42d392 25%, #647eff);
+    border: none;
+    padding: 5px 10px;
+    margin: 5px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+</style>
+.....................................................................................					Slots -Component as Prop
+....................................................................................
+
+How to represent component?
+
+<MyComponent></MyComponent>
+<MyComponent/>
 
 
+<MyComponent>
+    you are sending component /html elements  => slot content
+</MyComponent>
+
+ParentSlot.vue
+
+<script setup>
+import ChildSlot from './ChildSlot.vue';
+import Header from './Header.vue';
+</script>
+<template>
+    <h1>Parent - Slot</h1>
+    <!-- we send html elements as prop -->
+    <ChildSlot>
+        <h1>Hello</h1>
+    </ChildSlot>
+    <!-- another component as prop -->
+    <ChildSlot>
+        <Header />
+    </ChildSlot>
+</template>
 
 
+ChildSlot.vue
+<script setup>
 
-
-
+</script>
+<template>
+    <div>
+        <!-- insert template content from the parent -->
+        <slot></slot> <!-- Slot is built in component called outlet(wrapper/container)-->
+    </div>
+</template>
 
 
 
