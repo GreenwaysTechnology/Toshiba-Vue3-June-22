@@ -3190,7 +3190,6 @@ import Header from './Header.vue';
     </ChildSlot>
 </template>
 
-
 ChildSlot.vue
 <script setup>
 
@@ -3201,6 +3200,716 @@ ChildSlot.vue
         <slot></slot> <!-- Slot is built in component called outlet(wrapper/container)-->
     </div>
 </template>
+...................................................................................
+				Fallback Content
+
+Eg:
+
+<MyComponent>
+    some content
+</MyComponent>
+
+Mycomponent.vue
+
+<template>
+  <div>
+       <slot></slot>
+  </div>
+</template>
+
+Parent.vue
+<script setup>
+import Child from './Child.vue';
+</script>
+<template>
+    <h1>Slot Parent</h1>
+ <Child>
+        <h1>From the parent</h1>
+ </Child>
+ <Child/>
+</template>
+
+Child.vue
+<script setup>
+</script>
+<template>
+    <h1>Slot Child</h1>
+    <div>
+        <slot>
+            <p>default slot content /fallback content</p>
+        </slot>
+    </div>
+</template>
+.....................................................................................
+			     Muliti Slots
+.....................................................................................
+
+Can i have multi slot?
+ Yes we can have
+
+Without slot
+<Layout>
+  <Header/>
+  <Body/>
+  <Footer/>
+</Layout>
+
+<Layout>
+  <Header>
+    <!---Header information--->
+  </Header>
+  <Body>
+    <!---Body information--->
+  </Body>
+  <Footer>
+    <!---Footer information--->
+  </Footer>
+</Layout>
+....................................................................................
+
+We can achive multi slots using named slots concept
+
+Each slot can have name which can be further mapped in the parent compoent
+
+child
+<slot name="header"></slot>
+
+parent
+<template v-slot:header>
+
+</template>
+..............................
+
+App.vue/Parent
+<script setup>
+import Layout from './slots/Layout.vue';
+
+</script>
+<template>
+    <h1>Vue Application</h1>
+    <hr />
+    <Layout>
+        <template v-slot:header>
+            <h1>Header</h1>
+        </template>
+        <template v-slot:main>
+            <p>This is body</p>
+        </template>
+        <template v-slot:footer>
+            <h1>Footer</h1>
+        </template>
+    </Layout>
+</template>
+
+
+
+Layout.vue
+<script setup>
+</script>
+<template>
+    <h1>Layout</h1>
+    <hr />
+    <div class="container">
+        <header>
+            <slot name="header">
+                <h1>default Header</h1>
+            </slot>
+        </header>
+        <main >
+            <slot name="main">
+                <p>default content</p>
+            </slot>
+        </main>
+        <footer>
+            <slot name="footer">
+                <h2>default footer</h2>
+            </slot>
+        </footer>
+    </div>
+</template>
+
+short cuts to refer slots:
+
+without v-slot directive , we can use #name 
+
+<Layout>
+        <template #header>
+            <h1>Header</h1>
+        </template>
+        <template #main>
+            <p>This is body</p>
+        </template>
+        <template #footer>
+            <h1>Footer</h1>
+        </template>
+    </Layout>
+.................................
+
+Default slot:
+     The slot without name is called default slot
+child
+<template>
+    <h1>Layout</h1>
+    <hr />
+    <div class="container">
+        <header>
+            <slot name="header">
+                <h1>default Header</h1>
+            </slot>
+        </header>
+        <!-- Default slot : without any name -->
+        <main>
+            <slot>
+                <p>default content</p>
+            </slot>
+        </main>
+        <footer>
+            <slot name="footer">
+                <h2>default footer</h2>
+            </slot>
+        </footer>
+    </div>
+</template>
+
+parent
+<template #default>
+
+</template>
+
+eg:
+
+<template>
+    <Layout>
+        <template #header>
+            <h1>Header</h1>
+        </template>
+        <template #default>
+            <p>This is body</p>
+        </template>
+        <template #footer>
+            <h1>Footer</h1>
+        </template>
+    </Layout>
+</template>
+....................................................................................
+				Dynamic slots
+
+The slot name can be dynamic
+
+static slot name
+
+<template v-slot:header>
+<template #header>
+
+Dynamic slot name
+
+const header = ref('header')
+
+<template v-slot:[header]>
+<template #[header]>
+
+
+eg:
+<script setup>
+import { ref } from 'vue';
+import Layout from './slots/Layout.vue';
+
+const header = ref('header')
+
+</script>
+<template>
+  <Layout>
+        <!-- <template v-slot:[header]>
+            <h1>Header</h1>
+        </template> -->
+        <template #[header]>
+            <h1>Header</h1>
+        </template>
+        <template #default>
+            <p>This is body</p>
+        </template>
+        <template #footer>
+            <h1>Footer</h1>
+        </template>
+    </Layout>
+</template>
+....................................................................................
+				Slot Scopes
+
+Slot scopes enable data accessiblity for parent and child
+
+There are two scopes:
+1.Render scope
+2.Scoped slots
+
+Render Scope:
+
+=>The slot content has acccess to the data scope of the parent compoent, since it is defined in the parent component 
+
+=>slot content does not have access to the child compoent's data.
+
+     "As rule of thumb Every thing in the parent template is compiled in 
+      Parent scope; every thing is compiled in the child template in the child
+      scope"
+
+Scoped Slot:
+...........
+   if you want to access data in the parent and child scope.
+  
+  "If parent component want to access child data(state) , the child can pass data 
+   to parent via "slot" when rendering it.
+   
+   Slot can act as bridge between child and parent.
+
+Child:
+
+ <slot :name="name" :age="age"...>
+
+Parent
+  <MyComponent v-slot="variableName">
+        
+  </MyComponent>
+
+
+
+Parent:
+<script setup>
+import { ref } from 'vue';
+import ScopeSlot from './slots/ScopeSlot.vue';
+</script>
+<template>
+    <h1>Vue Application</h1>
+    <hr />
+    <!--Scoped Slots : Sending data from the child to Parent  -->
+    <ScopeSlot v-slot="slotProps">
+        {{ slotProps.message }}
+    </ScopeSlot>
+
+</template>
+
+child
+<script setup>
+import { ref } from 'vue';
+const message = ref('From Child')
+</script>
+<template>
+    <div>
+        <!-- Send data to the parent compoent -->
+        <slot :message="message"></slot>
+    </div>
+</template>
+..............................................................................	
+			  Depedency Injection - Provide/Inject
+..............................................................................			  
+Prop Driling:
+
+ When you pass data from the parent component to child, from child to its child and so on, at each level you have to pass props manually
+
+                        Root
+			 |
+			props
+			 |
+			Child1
+			 |props
+			Child2
+			 |props
+			Child3
+			 |props
+		        Child-N
+
+Parent - App.vue
+<script setup>
+import { ref } from 'vue';
+import Child1 from './propsdrilling/Child1.vue';
+const message = ref('Hello')
+</script>
+<template>
+    <h1>Root</h1>
+    <Child1 :message="message" />
+</template>
+
+Child1.vue
+<script setup>
+import Child2 from './Child2.vue';
+const props = defineProps(['message'])
+</script>
+<template>
+    <h1>Child 1</h1>
+    <Child2 :message="props.message" />
+</template>
+
+Child2.vue
+<script setup>
+import Child3 from './Child3.vue';
+const props = defineProps(['message'])
+
+</script>
+<template>
+    <h1>Child 2</h1>
+    <Child3 :message="props.message" />
+</template>
+
+Child3.vue
+<script setup>
+const props = defineProps(['message'])
+
+</script>
+<template>
+    <h1>Child 3 {{ props.message }}</h1>
+</template>
+
+What if  i want to access the data which is supplied in the root component into the deepest child component.
+
+We can solve props drilling with "provide and inject".
+
+Parent component can act as dependency provider to all its decendants.
+
+Any component in the decendants tree, regardless of how deep it is, can inject dependencies provided by components up in its parent chain.
+
+  			Root -  Provide
+			 |        |
+			props     |
+			 |        |
+			Child1    |
+			 |        |
+			Child2    |
+			 |        |
+			Child3    |
+			 |        |
+		        Child-N - Inject
+
+
+eg:
+How to pass single variable and How to object ? and how to make it reactive?
+
+Parent-App.vue
+
+<script setup>
+import { ref, provide } from 'vue';
+import Child1 from './propsdrilling/Child1.vue';
+
+const message = ref('Hello')
+//dynamic provider
+const counter = ref(0)
+//provider data
+// provide('name', 'Subramanian')
+// provide('counter', counter)
+//short cut
+provide('info', {
+    counter, message
+})
+</script>
+<template>
+    <h1>Root</h1>
+    <Child1 :message="message" />
+    <button @click="counter++">+</button>
+</template>
+
+....
+
+Child Level
+<script setup>
+import { inject } from 'vue'
+const props = defineProps(['message'])
+
+// const name = inject('name', 'default Name')
+// const counter = inject('counter', 0)
+const { name, counter } = inject('info')
+</script>
+<template>
+    <h1>Child 3 {{ props.message }}</h1>
+    <h1>Global Data {{ name }} {{ counter }}</h1>
+
+</template>
+...................................................................................
+			App Level Data sharing
+
+You have to provide via app object.
+
+app.provide('company','google')
+
+main.js
+import { createApp } from 'vue'
+import App from './App.vue'
+
+createApp(App)
+    .provide('company', 'google')
+    .mount('#app')
+
+
+In any component:
+<script setup>
+import { inject } from 'vue'
+const props = defineProps(['message'])
+
+// const name = inject('name', 'default Name')
+// const counter = inject('counter', 0)
+const { name, counter } = inject('info')
+const company = inject('company')
+</script>
+<template>
+    <h1>Child 3 {{ props.message }}</h1>
+    <h1>Tree level Global Data {{ name }} {{ counter }}</h1>
+    <h1>App level Global Data {{ company }}</h1>
+
+</template>
+.....................................................................................
+			    Composables
+....................................................................................
+
+Composable is just plain javascript function that separates resuable stateful logic
+(logic which has state).
+
+When we build apps, either server side or client, we need some biz logic has to be reused across the application.
+
+eg:
+  Date formater, String utilities.
+
+
+Mouse tracking:
+ i want to get Mouse positions for that we write logic inside component.
+
+Without resue:
+, onUnmountedonMounted, <script setup>
+//Track mouse positions and display on the screen
+import { ref, onMounted,onUnmounted } from 'vue';
+
+//state
+const x = ref(0)
+const y = ref(0)
+
+//logic to update
+function update(event) {
+    console.log('moving....')
+    x.value = event.pageX
+    y.value = event.pageY
+}
+//Life cycles to register dom events
+onMounted(() => {
+    //register mouse listener
+    window.addEventListener('mousemove', update)
+})
+onUnmounted(()=>{
+     //register mouse listener
+    window.removeEventListener('mousemove', update)
+})
+</script>
+<template>
+    <h1>Mouse Position x: {{ x }} y: {{ y }}</h1>
+</template>
+
+Here, we write logic to get Mouse positions in side app component, what if i want the same logic again inside another component.
+
+Solution is : Composable.
+
+src/composables/mousetracker.js
+
+import { ref, onMounted, onUnmounted } from 'vue'
+
+//all composable function starts with "use" convention only/ not synatx
+export function useMouseTracker() {
+    //state
+    const x = ref(0)
+    const y = ref(0)
+    //logic
+    function update(event) {
+        console.log('moving....')
+        x.value = event.pageX
+        y.value = event.pageY
+    }
+    //Life cycles to register dom events
+    onMounted(() => {
+        //register mouse listener
+        window.addEventListener('mousemove', update)
+    })
+    onUnmounted(() => {
+        //register mouse listener
+        window.removeEventListener('mousemove', update)
+    })
+    //return state as object and even logic : you can return any thing but should be encapsulated inside object
+    return {
+        x,
+        y
+    }
+
+}
+
+App.vue
+ <script setup>
+//import composable api
+import { useMouseTracker } from './composables/mousetracker.js'
+//invoke composable apis
+const { x, y } = useMouseTracker()
+
+</script>
+<template>
+    <h1>Mouse Position x: {{ x }} y: {{ y }}</h1>
+</template>
+.....................................................................................
+			Ajax calls and Composablity
+....................................................................................
+
+Ajax calls you can do with help any ajax apis, vue has no opionion on that.
+
+Popular implementation
+1.fetch api
+2.axios api
+
+
+How to fetch data using fetch api:
+
+<script setup>
+import { ref, onMounted } from 'vue'
+
+//state variables
+const data = ref(null)
+const error = ref(null)
+
+//function api
+function fetchData() {
+    fetch('https://jsonplaceholder.typicode.com/todos')
+        .then(res => res.json())
+        .then(todos => {
+            data.value = todos
+            console.log(data.value)
+        })
+        .catch(err => {
+            error.value = err
+        })
+}
+
+onMounted(() => {
+    //call fetch api
+    fetchData();
+})
+
+
+</script>
+<template>
+    <div>
+        <h1>Todo app</h1>
+        <div v-if="error">Opps! Error Encountered : {{ error.message }}</div>
+        <div v-else-if="data">
+            <div v-for="todo of data">
+                <p>{{ todo.title }}</p>
+            </div>
+        </div>
+        <div v-else>
+            <h1>Loading...</h1>
+        </div>
+    </div>
+
+</template>
+
+Drawback in the above code:
+
+1.ajax/fetch logic is tightly coupled with component.
+
+
+How to write reusable ajax logic ?
+ Composable api
+
+composable/fetch.js
+import { ref, onMounted } from 'vue'
+
+export function useFetch(url) {
+    //state variables
+    const data = ref(null)
+    const error = ref(null)
+    //function api
+    async function fetchData() {
+        // fetch(url)
+        //     .then(res => res.json())
+        //     .then(output => {
+        //         data.value = output
+        //     })
+        //     .catch(err => {
+        //         error.value = err
+        //     })
+        try {
+           // const output = await (await fetch(url)).json()
+          //  const output = await res.json()
+            data.value = await (await fetch(url)).json()
+        }
+        catch (err) {
+            error.value = err
+        }
+    }
+
+    onMounted(() => {
+        //call fetch api
+        fetchData();
+    })
+    //return 
+    return {
+        data,
+        error
+    }
+
+}
+
+App.vue
+<script setup>
+import { useFetch } from './composables/fetch.js'
+
+//with destructuring
+const { data, error } = useFetch('https://jsonplaceholder.typicode.com/todos')
+//without destructuring
+// const todos = useFetch('https://jsonplaceholder.typicode.com/todos')
+
+</script>
+<template>
+    <div>
+        <h1>Todo app</h1>
+        <div v-if="error">Opps! Error Encountered : {{ error.message }}</div>
+        <div v-else-if="data">
+            <div v-for="todo of data">
+                <p>{{ todo.title }}</p>
+            </div>
+        </div>
+        <div v-else>
+            <h1>Loading...</h1>
+        </div>
+    </div>
+
+</template>
+
+Now vue starts using lot of composable apis, which every growing....
+https://vueuse.org/
+
+eg:
+<script setup>
+import { useFetch } from './composables/fetch.js'
+import { useTitle } from '@vueuse/core'
+
+
+const title = useTitle('New Title', { titleTemplate: '%s | My Awesome Website' })
+
+//with destructuring
+const { data, error } = useFetch('https://jsonplaceholder.typicode.com/todos')
+//without destructuring
+// const todos = useFetch('https://jsonplaceholder.typicode.com/todos')
+
+
+</script>
+<template>
+    <div>
+        <h1>Todo app</h1>
+        <div v-if="error">Opps! Error Encountered : {{ error.message }}</div>
+        <div v-else-if="data">
+            <div v-for="todo of data">
+                <p>{{ todo.title }}</p>
+            </div>
+        </div>
+        <div v-else>
+            <h1>Loading...</h1>
+        </div>
+    </div>
+
+</template>
+
+
+
 
 
 
