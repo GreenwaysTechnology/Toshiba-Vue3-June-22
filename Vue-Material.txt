@@ -4603,7 +4603,21 @@ npm install vue-router@4
 
 for app which begins new project
 
+Web Application url pattern:
 
+1.static url
+ http://www.example.com/products.html / products.pdf
+2.dynamic web url
+ http://www.example.com/products.do /products.jsp | products.aspx | products.php
+3.Web service url - REST Api
+ http://www.example.com/api/products =>json
+4.SPA Web url
+SPA URL Patterns:
+................
+1.web url - looks like web service url
+   http://www.example.com/hello /products
+2.hash url pattern-  
+http://www.example.com/index.html#hello |#products
 
 Steps:
 
@@ -4657,13 +4671,1110 @@ import { RouterLink, RouterView } from 'vue-router'
         <RouterView></RouterView>
     </div>
 </template>
+....................................................................................
+
+URL patterns:
+
+static url
+ '/hello'
+dynamic url
+ '/greet/:message'
+
+Dynamic Route parameter like message variable if you want to read inside component.
+
+if you are in old vue , there is object this.$route
+
+if you are in vue 3, composition api, with setup attribute/ function, we have  composobale apis
+
+useRouter
+useRoute - exposes all url related apis , like reading parameters
+
+"$route and $router are built in objects which can be still used inside template without using useRouter and useRoute api"
 
 
+components/Greeter.vue
+
+<script setup>
+import { watch,ref } from 'vue';
+import { useRoute } from 'vue-router';
+//Composable api to read params,query
+const route = useRoute()
 
 
+</script>
+<template>
+    <h1>{{ route.params.message }}</h1>
+    <!-- Directly you can access route information inside template -->
+    <h1>{{ $route.params.message }}</h1>
+
+</template>
+
+router/index.js
+import Greeter from '../components/Greeter.vue'
+import { createRouter, createWebHistory } from 'vue-router'
 
 
+//route configuration
+const routes = [
+   {
+        path: '/greet/:message',
+        component: Greeter
+    }
+]
+//create router object
+const router = createRouter({
+    history: createWebHistory(import.meta.env.BASE_URL),
+    routes
+})
+
+export default router;
+....................................................................................
+
+Not Found:
+if any url match is statisfied, we need to map to certain url
+
+  {
+        path: '/:pathMatch(.*)*',
+        name:'NotFound',
+        component: NotFound
+    }
+...................................................................................
+			   path match expression
+
+Vue router inspired from "express" js routing model
+
+static
+/users
+dynamic
+
+/users/:id
+
+Rules : regular expressions
+
+//order id must be number
+/orders/:orderId(\\+d) 
+
+/orders/:orderId? - optional parameter
+
+Valid url patterns
+/orders 
+/orders/1
+
+...................................................................................
+			Nested routing
+...................................................................................
+
+user
+ |
+ profile
+ post
+ comments
+
+/user/ram/profile
+/user/ram/posts
+/user/ram/comments
 
 
+import Home from '../components/Home.vue'
+import Greeter from '../components/Greeter.vue'
+import NotFound from '../components/NotFound.vue'
+import HelloWorld from '../components/HelloWorld.vue';
+import User from '../components/User.vue'
+import UserProfile from '../components/UserProfile.vue'
+import UserPost from '../components/UserPost.vue'
+
+import { createRouter, createWebHistory } from 'vue-router'
 
 
+//route configuration
+const routes = [
+    {
+        path: '/',
+        component: Home
+    }
+    {
+        path: '/user/:name',
+        component: User,
+        //nested routing
+        children: [
+            {
+                path: 'profile',
+                component: UserProfile
+            },
+            {
+                path: 'posts',
+                component: UserPost
+            }
+        ]
+    },
+    //will match everything and put under
+    {
+        path: '/:pathMatch(.*)*',
+        name: 'NotFound',
+        component: NotFound
+    }
+
+]
+//create router object
+const router = createRouter({
+    history: createWebHistory(import.meta.env.BASE_URL),
+    routes
+})
+
+export default router;
+
+
+App.vue
+<script setup>
+import { RouterLink, RouterView } from 'vue-router'
+</script>
+<template>
+    <div>
+        <!-- Menu Bar -->
+        <nav>
+            <RouterLink to="/">Home</RouterLink>
+            <RouterLink to="/hello">Hello</RouterLink>
+            <RouterLink to="/user/ram">User</RouterLink>
+
+        </nav>
+        <!-- Place Holder to display view based on route change -->
+        <RouterView></RouterView>
+    </div>
+</template>
+
+User.vue
+<script setup>
+import { RouterLink, RouterView } from 'vue-router'
+
+</script>
+<template>
+    <h1>User</h1>
+    <h1>{{ $route.params.name }} {{$route.path}} {{$route.fullPath}}</h1>
+    <nav>
+        <RouterLink to="/user/ram/profile">Profile</RouterLink>
+        <RouterLink to="/user/ram/posts">Posts</RouterLink>
+    </nav>
+    <!-- Nested View -->
+    <RouterView></RouterView>
+</template>
+.....................................................................................
+			   Programmetic Navigation
+.....................................................................................
+
+Declarative routing is implemneted via "router-link", Programmetic routing is implemented via "Router" Object
+
+Declarative:
+<router-link to="profile">
+
+Programmetic Routing
+const router = useRouter()
+
+router.push('url')
+router.push({path:'url'})
+
+  /greeter/foo => /greeter/:name
+router.push({path:'url',params:{name:'foo'}})
+
+//with query string
+ /users?order='asc'
+router.push({path:'url',query:{order:'asc'}})
+
+eg:
+
+List.vue
+<script setup>
+import { useRouter, useRoute } from 'vue-router';
+
+const router = useRouter()
+console.log(router)
+
+const goToPage = () => {
+    //redirect to HelloWorld Page
+    router.push({ path: 'hello' })
+}
+</script>
+<template>
+    <button @click="goToPage">Go to HelloWorld</button>
+    <button @click="$router.back">Back</button>
+
+</template>
+
+import Home from '../components/Home.vue'
+import Greeter from '../components/Greeter.vue'
+import NotFound from '../components/NotFound.vue'
+import HelloWorld from '../components/HelloWorld.vue';
+import User from '../components/User.vue'
+import UserProfile from '../components/UserProfile.vue'
+import UserPost from '../components/UserPost.vue'
+import List from '../components/List.vue'
+
+import { createRouter, createWebHistory } from 'vue-router'
+
+router/index.js
+
+//route configuration
+const routes = [
+    {
+        path: '/',
+        component: Home
+    },
+    {
+        path: '/hello',
+        component: HelloWorld
+    },
+    {
+        path: '/greet/:message',
+        component: Greeter
+    },
+    {
+        path: '/list',
+        component: List
+    },
+    {
+        path: '/user/:name',
+        component: User,
+        //nested routing
+        children: [
+            {
+                path: '/',
+                component: UserProfile
+            },
+            {
+                path: 'profile',
+                component: UserProfile
+            },
+            {
+                path: 'posts',
+                component: UserPost
+            }
+        ]
+    },
+    //will match everything and put under
+    {
+        path: '/:pathMatch(.*)*',
+        name: 'NotFound',
+        component: NotFound
+    }
+
+]
+//create router object
+const router = createRouter({
+    history: createWebHistory(import.meta.env.BASE_URL),
+    routes
+})
+
+export default router;
+....................................................................................
+			   Named Routes
+
+const routes = [
+  {
+    path:'/product/:id'
+    component:Product
+  }
+ 
+]
+
+<router-link to="/product/13">Product
+
+Here we have to refer whole path, instead we can simply using names
+
+const routes = [
+  {
+    path:'/product/:id'
+    component:Product,
+    name:'product' //this is unique identifer for route match
+  }
+ 
+]
+
+<router-link :to="{name:'product',params:{}}">Product
+
+<script setup>
+import { RouterLink, RouterView } from 'vue-router'
+</script>
+<template>
+    <div>
+        <!-- Menu Bar -->
+        <nav>
+            <ul>
+                <li>
+                    <RouterLink to="/">Home</RouterLink>
+                </li>
+                <li>
+                    <RouterLink to="/hello">Hello</RouterLink>
+                </li>
+                <li>
+                    <RouterLink to="/user/ram">User</RouterLink>
+                </li>
+                <li>
+                    <RouterLink :to="{ name: 'product' }">Product</RouterLink>
+                </li>
+            </ul>
+        </nav>
+        <!-- Place Holder to display view based on route change -->
+        <RouterView></RouterView>
+    </div>
+</template>
+
+import Home from '../components/Home.vue'
+import Greeter from '../components/Greeter.vue'
+import NotFound from '../components/NotFound.vue'
+import HelloWorld from '../components/HelloWorld.vue';
+import User from '../components/User.vue'
+import UserProfile from '../components/UserProfile.vue'
+import UserPost from '../components/UserPost.vue'
+import List from '../components/List.vue'
+import Product from '../components/Product.vue'
+
+import { createRouter, createWebHistory } from 'vue-router'
+
+
+//route configuration
+const routes = [
+    {
+        path: '/',
+        component: Home
+    },
+    {
+        path: '/hello',
+        component: HelloWorld
+    },
+    {
+        path: '/product',
+        component: Product,
+        name:'product'
+    },
+    {
+        path: '/greet/:message',
+        component: Greeter
+    },
+    {
+        path: '/list',
+        component: List
+    },
+    {
+        path: '/user/:name',
+        component: User,
+        //nested routing
+        children: [
+            {
+                path: '/',
+                component: UserProfile
+            },
+            {
+                path: 'profile',
+                component: UserProfile
+            },
+            {
+                path: 'posts',
+                component: UserPost
+            }
+        ]
+    },
+    //will match everything and put under
+    {
+        path: '/:pathMatch(.*)*',
+        name: 'NotFound',
+        component: NotFound
+    }
+
+]
+//create router object
+const router = createRouter({
+    history: createWebHistory(import.meta.env.BASE_URL),
+    routes
+})
+
+export default router;
+
+Product.vue
+<script setup>
+</script>
+<template>
+    <h1>Product</h1>
+    
+</template>
+.....................................................................................
+			  Master details
+
+
+Product
+ |
+ ------>   Product details
+ ------
+ 
+index.js
+  {
+        path: '/product',
+        component: Product,
+        name:'product'
+    },
+    {
+        path: '/product/:id',
+        component: ProductDetails,
+    }
+
+
+Product.vue
+<script setup>
+import { RouterLink } from 'vue-router';
+import { reactive } from 'vue';
+
+const PRODUCTS = [
+    { id: 1, name: 'a1' },
+    { id: 2, name: 'a2' },
+    { id: 3, name: 'a3' },
+    { id: 4, name: 'a4' },
+    { id: 5, name: 'a5' },
+    { id: 6, name: 'b6' },
+    { id: 7, name: 'a90' },
+    { id: 8, name: 'b45' },
+    { id: 9, name: 'a23' },
+    { id: 10, name: 'b12' }
+]
+
+const products = reactive(PRODUCTS)
+</script>
+<template>
+    <h1>Product</h1>
+    <ul>
+        <li v-for="product of products">
+            <span>
+                <RouterLink :to="'/product/' + product.id">{{ product.name }}</RouterLink>
+            </span>
+        </li>
+
+    </ul>
+</template>	
+
+Productdetails.vue
+<script setup>
+</script>
+<template>
+    <h1>{{ $route.params.id }} - Details</h1>
+</template>
+...................................................................................
+			    Lazy Loading
+.....................................................................................
+
+When building spa apps with a bundler like webpack, which packs the entire app as single bundle, it becomes quite large, thus affects performance  of page load during inital render. in order to avoid such performance bottle necks, we can load  the files when a route is visited. ->Lazy loading.
+
+How to implement lazy loading?
+
+ {
+        path: '/product/:id',
+        //lazy loaded component
+        component: import('../components/ProductDetails.vue')
+    }
+................................................................................
+			      CSS
+
+Vue supports global css 
+import { createApp } from 'vue'
+import App from './App.vue'
+import router from './router'
+import './assets/base.css'
+
+createApp(App)
+    .use(router)
+    .mount('#app')
+
+Vue supports component sepcific css - scoped styles
+
+with scoped
+<style scoped>
+h1 {
+    color: blue
+}
+</style>
+
+output:
+<h1 data-v-1c354f03="">7 - Details</h1>
+
+with out scoped
+<style>
+h1 {
+    color: blue
+}
+</style>
+<h1>7 - Details</h1>
+
+The scoped attribute is very useful , this attaches a unique HTML 5 data attribute
+selector to all of your styles, preventing them from colliding globally.
+<script setup>
+</script>
+<template>
+    <h1>{{ $route.params.id }} - Details</h1>
+</template>
+<style scoped>
+h1 {
+    color: blue
+}
+</style>
+...................................................................................
+			   Template Ref
+....................................................................................
+
+Vue never allows direct DOM access inside component, like accessing all dom properties such as style,target,listener......
+
+There is key word called "ref" - reference to the dom element
+
+<h1 ref="variable">Hello</h1>
+
+<script setup>
+import { onMounted, ref } from 'vue'
+//ref is poniter to dom elements
+const myheader = ref(null);
+
+//we can access any element once it is mounted inside browser
+onMounted(() => {
+    //this hook is called once the dom is ready
+    console.dir(myheader.value)
+
+})
+
+</script>
+<template>
+    <h1 ref="myheader">Hello</h1>
+</template>
+
+Note:
+dont over use template reference, only neccessary you have to use , which skips all vue render cycle.
+....................................................................................
+			Async Components With Suspense
+.................................................................................
+
+Async components are not loaded up front, rather which is loaded as chunk(small bundle), when ever it is necessary.
+
+const component = defineAsyncComponent(()=>{
+   import('./components/MyComponent.vue')
+})
+
+<script setup>
+import { defineAsyncComponent } from 'vue';
+
+const HelloWorld = defineAsyncComponent(() => import('./components/HelloWorld.vue'))
+
+</script>
+<template>
+    <HelloWorld />
+</template>
+
+.........................
+
+HelloWorld.vue
+<script setup>
+defineProps({
+  msg: {
+    type: String,
+    required: true
+  }
+})
+function delay() {
+  return new Promise((resolve, rejec) => {
+    setTimeout(resolve, 10000, 'I delay the process')
+  })
+}
+const output = await delay()
+
+</script>
+
+<template>
+  <div class="greetings">
+    <h1 class="green">{{ msg }} {{output}}</h1>
+    <h3>
+      You’ve successfully created a project with
+      <a target="_blank" href="https://vitejs.dev/">Vite</a> +
+      <a target="_blank" href="https://vuejs.org/">Vue 3</a>.
+    </h3>
+  </div>
+</template>
+
+<style scoped>
+h1 {
+  font-weight: 500;
+  font-size: 2.6rem;
+  top: -10px;
+}
+
+h3 {
+  font-size: 1.2rem;
+}
+
+.greetings h1,
+.greetings h3 {
+  text-align: center;
+}
+
+@media (min-width: 1024px) {
+
+  .greetings h1,
+  .greetings h3 {
+    text-align: left;
+  }
+}
+</style>
+...
+
+<script setup>
+import { defineAsyncComponent, Suspense } from 'vue';
+
+const HelloWorld = defineAsyncComponent(() => import('./components/HelloWorld.vue'))
+
+const message = 'Hello Async component'
+</script>
+<template>
+    <Suspense>
+        <HelloWorld :msg="message" />
+        <!-- This is fallback component when component takes more time to load -->
+        <template #fallback>
+            <h1>Loading...</h1>
+        </template>
+    </Suspense>
+</template>
+.....................................................................................
+			   Animations
+.....................................................................................
+
+vue Provides two implmentation for animation
+
+1.Transition -  Built in component
+2.TransitionGroup - Built in component 
+
+For Animations
+
+Stages:
+
+1.if user enters / leaves into the screen.
+
+In General animtations are implemented behind the scene using "CSS 3 advanced classes"
+
+Vue offers built in css based component for implementing basic animation features.
+
+<script setup>
+import { ref } from 'vue';
+
+const show = ref(true)
+
+</script>
+<template>
+    <button @click="show = !show">Toggle</button>
+    <Transition name="fade">
+        <p v-if="show">
+            Hey , How are you?
+        </p>
+    </Transition>
+</template>
+<style>
+/* Transition styles */
+.v-enter-active,
+.v-leave-active {
+    transition: opacity 0.5s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+    opacity: 0;
+}
+</style>
+
+...................
+
+<script setup>
+import { ref } from 'vue'
+const show = ref(true)
+</script>
+
+<template>
+	<button @click="show = !show">Toggle</button>
+  <Transition name="slide-fade">
+    <p v-if="show">hello</p>
+  </Transition>
+</template>
+
+<style>
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.8s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateX(20px);
+  opacity: 0;
+}
+</style>
+.....................................................................................
+			State Management using Pinia
+....................................................................................
+
+State management is nothing but Managining state(data) of application.
+
+State(Data) is represented and managed in various places
+
+1.inside component - via reactive properties
+2.outside component within component tree - via props(parent to child)
+3.outside component within component tree -via events(child to parent)
+
+4.Sharing data globally.
+
+component
+
+state
+  The state, the source of truth that drives our application
+view
+ The view, a declarative mapping of the state
+actions
+ The actions, the possible ways the state could change in reaction to user inputs from the view
+
+
+Component state,actions,view:
+<script setup>
+import { ref } from 'vue';
+
+//state - reactive state
+const counter = ref(0)
+//actions
+const onIncrement = () => counter.value++
+
+</script>
+<template>
+    <!-- View -->
+    <div>
+        <h1>Counter {{ counter }}</h1>
+        <!-- User interacts  -->
+        <button @click="onIncrement">+</button>
+    </div>
+</template>
+<style scoped>
+</style>
+///////////////////////////////////////////////////////////////////////////////////
+			 Separate state from the component
+
+
+store/counterstore.js
+import { ref } from 'vue';
+
+// //state - reactive state
+// export const counterStore = ref(0)
+
+// //actions
+// export const onIncrement = () => counterStore.value++
+const store = {
+    state: {
+        counterStore: ref(0)
+    },
+    actions: {
+        onIncrement() {
+            //console.log(store.state.counterStore.value)
+            store.state.counterStore.value++
+        }
+    }
+}
+
+export default store;
+
+//
+components/Counter.vue
+<script setup>
+import { ref } from 'vue';
+import counterStore from '../store/counterstore.js'
+
+</script>
+<template>
+    <!-- View -->
+    <div>
+        <h1>Counter {{ counterStore.state.counterStore }}</h1>
+        <!-- User interacts  -->
+        <button @click="counterStore.actions.onIncrement">+</button>
+    </div>
+</template>
+<style scoped>
+</style>
+
+//
+App.vue
+<script setup>
+import counterStore from './store/counterstore.js'
+import Counter from './components/Counter.vue'
+
+</script>
+<template>
+    <!-- View -->
+    <div>
+        <h1>Counter {{ counterStore.state.counterStore }}</h1>
+        <!-- User interacts  -->
+        <button @click="counterStore.actions.onIncrement">+</button>
+    </div>
+    <h1>Counter Component</h1>
+    <Counter></Counter>
+</template>
+<style scoped>
+</style>
+.................................................................................
+			StateManagement libs - Pinia
+.................................................................................
+		
+What is Pinia?
+
+State management lib for managing state and its life cycle for vue applications.
+
+Pinia is written for "VUE 3 compostion api model and Composable style", unlike VueX another statemanagement lib for vue 2 , which is written imperative style.
+
+Pinia can work with both versions, but highly recommended for vue 3
+
+Why Pinia?
+
+1.Dev tool Support
+
+2.HMR Support
+
+3.Typescript support
+
+4.SSR Support
+
+
+How to start with Pinia?
+
+npm install pinia
+
+
+Since pinia is supplied as plugin, so we need to configure pinia
+main.js
+import { createApp } from 'vue'
+import App from './App.vue'
+import { createPinia } from 'pinia'
+
+createApp(App)
+  .use(createPinia())
+    .mount('#app')
+....................................................................................
+
+Pinia Core Concepts:
+....................
+
+1.store
+2.Actions
+3.Getters
+
+Store:
+ Object  which encapsulate component's (state,actions (computed)), The state inside store is reactive by default.
+
+Actions:
+  Object which encapsulate components behaviour(methods)
+
+Getters:
+  Object which encapulate components computed properties
+
+
+Store = {state + actions + getters}
+
+Steps:
+
+1.create store
+   defineStore api from pinia to create store
+//every store name starts with "use+StoreName"
+
+import { defineStore } from "pinia";
+
+//create store
+export const useCounterStore = defineStore('counter', {
+    //state
+    state: () => {
+        //return inital state
+        return {
+            count: 10
+        }
+    },
+    //actions
+    actions: {
+        increment() {
+            this.count++
+        }
+    },
+    //getters (computed Properties)
+    getters: {
+        doubleIt: state => state.count * 2
+    }
+})
+
+   
+2.use store
+<script setup>
+//how to use store
+import { useCounterStore } from './store/useCounterStore.js';
+const counter = useCounterStore()
+
+</script>
+<template>
+    <div>
+        <h1>Pinia State Management App</h1>
+        <h2>Counter {{counter.count}} Double Counter {{counter.doubleIt}}</h2>
+        <button @click="counter.increment">+</button>
+    </div>
+</template>
+<style>
+</style>
+....................................................................................
+			Extra apis from the store
+
+
+$reset
+ method is used to reset to inital state.
+
+<script setup>
+//how to use store
+import { useCounterStore } from './store/useCounterStore.js';
+const counter = useCounterStore()
+
+</script>
+<template>
+    <div>
+        <h1>Pinia State Management App</h1>
+        <h2>Counter {{ counter.count }} Double Counter {{ counter.doubleIt }}</h2>
+        <button @click="counter.increment">+</button>
+        <button @click="counter.$reset">Reset</button>
+
+    </div>
+</template>
+<style>
+</style>
+
+$patch:
+
+ You can mutate state directly, counter.value++, this can be done indirectly via $patch method
+
+        <button @click="counter.$patch({
+            count: counter.count + 1
+        })">Patch</button>
+
+............
+
+Adding watcher on to the store:
+
+ We can watch what is going on in the state mutations.
+
+<script setup>
+//how to use store
+import { useCounterStore } from './store/useCounterStore.js';
+const counter = useCounterStore()
+
+//watch changes in the store
+counter.$subscribe((mutation, state) => {
+    console.log('Mutation=>', mutation, 'State=>', state)
+})
+
+</script>
+<template>
+    <div>
+        <h1>Pinia State Management App</h1>
+        <h2>Counter {{ counter.count }} Double Counter {{ counter.doubleIt }}</h2>
+        <button @click="counter.increment">+</button>
+        <button @click="counter.$reset">Reset</button>
+        <button @click="counter.$patch({
+            count: counter.count + 1
+        })">Patch</button>
+
+
+    </div>
+</template>
+<style>
+</style>
+....................................................................................
+			 Async Operations - timer,ajax calls
+.....................................................................................
+
+//every store name starts with "use+StoreName"
+
+import { defineStore } from "pinia";
+
+//create store
+export const useCounterStore = defineStore('counter', {
+    //state
+    state: () => {
+        //return inital state
+        return {
+            count: 10,
+        }
+    },
+    //actions
+    actions: {
+        increment() {
+            this.count++
+        },
+        //async increment
+        async incrementAsync() {
+            let res = new Promise((resolve, reject) => {
+                setTimeout(resolve, 1000, this.count)
+            })
+
+            this.count = await res + 1
+        }
+    },
+    //getters (computed Properties)
+    getters: {
+        doubleIt: state => state.count * 2
+    }
+})
+...................................................................................
+				Ajax calls with Pinia
+...................................................................................
+
+store/useTodos.js
+import { defineStore } from "pinia";
+
+
+export const useTodosStore = defineStore('todos', {
+    state: () => {
+        return {
+            todos: []
+        }
+    },
+    actions: {
+        async fetchTodos() {
+            try {
+                const response = await fetch('https://jsonplaceholder.typicode.com/todos')
+                const data = await response.json()
+                this.todos = data
+
+            }
+            catch (err) {
+                console.log(err)
+            }
+        }
+    }
+})
+
+App.vue
+<script setup>
+import { onMounted } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useTodosStore } from './store/useTodos.js'
+
+const TodosStore = useTodosStore();
+
+//destructure of reactive properties(state)
+const { todos } = storeToRefs(TodosStore)
+
+//actions destructure
+const { fetchTodos } = TodosStore
+
+//after dom ready
+onMounted(() => {
+    //TodosStore.fetchTodos()
+    fetchTodos()
+})
+
+</script>
+<template>
+    <h1>Todo App using Pinia</h1>
+    <ul>
+        <li v-for="todo of todos">
+            <span>{{ todo.title }}</span>
+        </li>
+    </ul>
+</template>

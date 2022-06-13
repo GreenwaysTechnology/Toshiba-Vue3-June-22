@@ -5,8 +5,20 @@ import { RouterLink, RouterView } from 'vue-router'
     <div>
         <!-- Menu Bar -->
         <nav>
-            <RouterLink to="/">Home</RouterLink>
-            <RouterLink to="/hello">Hello</RouterLink>
+            <ul>
+                <li>
+                    <RouterLink to="/">Home</RouterLink>
+                </li>
+                <li>
+                    <RouterLink to="/hello">Hello</RouterLink>
+                </li>
+                <li>
+                    <RouterLink to="/user/ram">User</RouterLink>
+                </li>
+                <li>
+                    <RouterLink :to="{ name: 'product' }">Product</RouterLink>
+                </li>
+            </ul>
         </nav>
         <!-- Place Holder to display view based on route change -->
         <RouterView></RouterView>

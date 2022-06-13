@@ -1,7 +1,7 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import { myPlugin } from './plugins/myplugin'
-
+import { createPinia } from 'pinia'
 createApp(App)
     .provide('company', 'google')
     .directive('focus', (element, binding) => {
@@ -9,7 +9,7 @@ createApp(App)
         element.focus()
     })
     .directive('highlight', (element, binding) => {
-      
+
         //set inital color:
         element.style.backgroundColor = binding.value
         element.addEventListener('mousemove', (evt) => {
@@ -26,4 +26,5 @@ createApp(App)
         }
     })
     .use(myPlugin)
+    .use(createPinia())
     .mount('#app')
